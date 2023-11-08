@@ -9,8 +9,8 @@ type MsgResponse struct {
 }
 
 func ErrResponse(c *gin.Context, status int, msg string) error {
-	c.JSON(status, &MsgResponse{
-		Message: msg,
+	c.JSON(status, gin.H{
+		"msg": msg,
 	})
 	return nil
 }

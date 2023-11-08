@@ -11,11 +11,12 @@ func (s *server) todoService() {
 	usecaseTodo := todousecase.NewTodoUsecase(repoTodo)
 	httpHandlerTodo := todohandler.NewTodoHttpHandler(s.cfg, usecaseTodo)
 
-	todo := s.app.Group("/todo")
+	todo := s.app.Group("/todo_v1")
 	todo.GET("/list-todo", httpHandlerTodo.FindManyTodo)
 	todo.GET("/todo/:todoId", httpHandlerTodo.FindOneTodo)
 	todo.POST("/todo", httpHandlerTodo.CreateItem)
 	todo.DELETE("/todo/:todoId", httpHandlerTodo.DeleteOneTodo)
+	todo.PATCH("/todo", httpHandlerTodo.UpdateOneTodo)
 
 	// auth := s.app.Group("/auth_v1")
 

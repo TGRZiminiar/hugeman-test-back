@@ -33,7 +33,7 @@ func (c *contextWrapper) Bind(data any) error {
 	}
 
 	if err := c.validator.Struct(data); err != nil {
-		log.Printf("Error: Validate data failed: %s", err.Error())
+		// log.Printf("Error: Validate data failed: %s", err.Error())
 		return fmt.Errorf("error: validate data failed: %s", err.Error())
 	}
 

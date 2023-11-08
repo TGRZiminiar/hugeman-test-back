@@ -17,6 +17,7 @@ type (
 		FindOneTodo(pctx context.Context, todoId string) (*todo.TodoShowcase, error)
 		DeleteOneTodo(pctx context.Context, todoId string) (int64, error)
 		FindManyTodo(pctx context.Context) ([]*todo.TodoShowcase, error)
+		UpdateOneTodo(pctx context.Context, req *todo.UpdateTodoReq) (*todo.TodoShowcase, error)
 	}
 
 	todoUsecase struct {
@@ -42,8 +43,23 @@ func (u *todoUsecase) InsertOneTodo(pctx context.Context, req *todo.CreateTodoRe
 	}
 
 	return u.FindOneTodo(pctx, todoId.Hex())
-
 }
+func (u *todoUsecase) UpdateOneTodo(pctx context.Context, req *todo.UpdateTodoReq) (*todo.TodoShowcase, error) {
+	err := u.todoRepository.UpdateOneTodo(pctx, &todo.TodoShowcase{
+		Id:          req.Id,
+		Title:       req.Title,
+		Description: req.Description,
+		UpdatedAt:   utils.LocalTime(),
+		Image:       req.Image,
+		Status:      req.Status,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return u.FindOneTodo(pctx, req.Id)
+}
+
 func (u *todoUsecase) FindOneTodo(pctx context.Context, todoId string) (*todo.TodoShowcase, error) {
 	result, err := u.todoRepository.FindOneTodo(pctx, todoId)
 	if err != nil {
@@ -62,7 +78,7 @@ func (u *todoUsecase) FindOneTodo(pctx context.Context, todoId string) (*todo.To
 		Description: result.Description,
 		CreatedAt:   result.CreatedAt.In(loc),
 		UpdatedAt:   result.UpdatedAt.In(loc),
-		Image:       result.Image,
+		Image:       "data:image/png;base64," + result.Image,
 		Status:      result.Status,
 	}, nil
 }
@@ -86,7 +102,7 @@ func (u *todoUsecase) FindManyTodo(pctx context.Context) ([]*todo.TodoShowcase, 
 			Id:          v.Id.Hex(),
 			Title:       v.Title,
 			Description: v.Description,
-			Image:       v.Image,
+			Image:       "data:image/png;base64," + v.Image,
 			Status:      v.Status,
 			CreatedAt:   v.CreatedAt.In(loc),
 			UpdatedAt:   v.UpdatedAt.In(loc),

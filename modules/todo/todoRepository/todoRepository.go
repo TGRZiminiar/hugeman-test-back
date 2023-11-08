@@ -20,6 +20,7 @@ type (
 		InsertOneTodo(pctx context.Context, req *todo.Todo) (primitive.ObjectID, error)
 		DeleteOneTodo(pctx context.Context, todoId string) (int64, error)
 		FindManyTodo(pctx context.Context) ([]*todo.Todo, error)
+		UpdateOneTodo(pctx context.Context, req *todo.TodoShowcase) error
 	}
 
 	todorepository struct {
@@ -96,6 +97,31 @@ func (r *todorepository) FindManyTodo(pctx context.Context) ([]*todo.Todo, error
 
 	return results, nil
 
+}
+
+func (r *todorepository) UpdateOneTodo(pctx context.Context, req *todo.TodoShowcase) error {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+	db := r.todoDbConn(ctx)
+	col := db.Collection("todos")
+
+	_, err := col.UpdateOne(
+		pctx,
+		bson.M{"_id": utils.ConvertToObjectId(req.Id)},
+		bson.M{
+			"$set": bson.M{
+				"title":       req.Title,
+				"description": req.Description,
+				"image":       req.Image,
+				"status":      req.Status,
+				"updated_at":  req.UpdatedAt,
+			}},
+	)
+	if err != nil {
+		log.Printf("Error: Update One Player Credentail %s", err.Error())
+		return errors.New("error: player credentail not found")
+	}
+	return nil
 }
 
 func (r *todorepository) InsertOneTodo(pctx context.Context, req *todo.Todo) (primitive.ObjectID, error) {
