@@ -105,6 +105,8 @@ func (r *todorepository) UpdateOneTodo(pctx context.Context, req *todo.TodoShowc
 	db := r.todoDbConn(ctx)
 	col := db.Collection("todos")
 
+	req.UpdatedAt = utils.LocalTime()
+
 	_, err := col.UpdateOne(
 		pctx,
 		bson.M{"_id": utils.ConvertToObjectId(req.Id)},
@@ -118,8 +120,8 @@ func (r *todorepository) UpdateOneTodo(pctx context.Context, req *todo.TodoShowc
 			}},
 	)
 	if err != nil {
-		log.Printf("Error: Update One Player Credentail %s", err.Error())
-		return errors.New("error: player credentail not found")
+		log.Printf("Error: UpdateOneTodo Failed %s", err.Error())
+		return errors.New("error: updateonetodo not found")
 	}
 	return nil
 }
@@ -129,6 +131,9 @@ func (r *todorepository) InsertOneTodo(pctx context.Context, req *todo.Todo) (pr
 	defer cancel()
 	db := r.todoDbConn(ctx)
 	col := db.Collection("todos")
+
+	req.CreatedAt = utils.LocalTime()
+	req.UpdatedAt = utils.LocalTime()
 
 	todoId, err := col.InsertOne(ctx, req)
 	if err != nil {
@@ -148,7 +153,7 @@ func (r *todorepository) DeleteOneTodo(pctx context.Context, todoId string) (int
 	result, err := col.DeleteOne(ctx, bson.M{"_id": utils.ConvertToObjectId(todoId)})
 	if err != nil {
 		log.Printf("Error: DeleteOneTodo failed: %s", err.Error())
-		return -1, errors.New("error: DeleteOneTodo failed")
+		return -1, errors.New("error: deleteonetodo failed")
 	}
 
 	log.Printf("Delete Result: %v", result)

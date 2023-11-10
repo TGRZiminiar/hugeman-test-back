@@ -8,6 +8,7 @@ import (
 	"github.com/TGRZiminiar/hugeman-test-back/config"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -55,7 +56,7 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	s.app.Use(cors.Default())
 
 	// Body Limit 10 mb
-	// s.app.Use(limits.RequestSizeLimiter(10))
+	// s.app.Use(limits.RequestSizeLimiter(500))
 
 	switch s.cfg.App.Name {
 	case "todo":

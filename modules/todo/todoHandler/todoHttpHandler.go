@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/TGRZiminiar/hugeman-test-back/config"
 	"github.com/TGRZiminiar/hugeman-test-back/modules/todo"
@@ -160,7 +161,12 @@ func (h *todoHttpHandler) UpdateOneTodo(c *gin.Context) {
 
 		req.Image = base64.StdEncoding.EncodeToString(data)
 	} else {
-		req.Image = ""
+		if strings.Contains(req.Image, "data:image/png;base64,") {
+			result := strings.Replace(req.Image, "data:image/png;base64,", "", -1)
+			req.Image = result
+		} else {
+			req.Image = ""
+		}
 	}
 
 	if err := wrapper.Bind(req); err != nil {

@@ -8,7 +8,6 @@ import (
 
 	"github.com/TGRZiminiar/hugeman-test-back/modules/todo"
 	todorepository "github.com/TGRZiminiar/hugeman-test-back/modules/todo/todoRepository"
-	"github.com/TGRZiminiar/hugeman-test-back/pkg/utils"
 )
 
 type (
@@ -33,8 +32,6 @@ func (u *todoUsecase) InsertOneTodo(pctx context.Context, req *todo.CreateTodoRe
 	todoId, err := u.todoRepository.InsertOneTodo(pctx, &todo.Todo{
 		Title:       req.Title,
 		Description: req.Description,
-		CreatedAt:   utils.LocalTime(),
-		UpdatedAt:   utils.LocalTime(),
 		Image:       req.Image,
 		Status:      req.Status,
 	})
@@ -49,7 +46,6 @@ func (u *todoUsecase) UpdateOneTodo(pctx context.Context, req *todo.UpdateTodoRe
 		Id:          req.Id,
 		Title:       req.Title,
 		Description: req.Description,
-		UpdatedAt:   utils.LocalTime(),
 		Image:       req.Image,
 		Status:      req.Status,
 	})
