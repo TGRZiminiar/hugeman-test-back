@@ -1,0 +1,445 @@
+{
+	"info": {
+		"_postman_id": "7041b022-b20a-4da2-9bd8-36b7dd6d397c",
+		"name": "hugemantest",
+		"description": "For the image it is because you required to make it base64 encode and i'm using a db so if i put it in a db it will take a lof of disk so i didn't select the image in the query that why you can't find the data of the image base64 in the example response but in the code that I sent to you it choose see the image data if you test it",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17633056"
+	},
+	"item": [
+		{
+			"name": "list-todo-withpaginate and sort",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{todoUrl}}/list-todo?page=1&limit=10&sort=status",
+					"host": [
+						"{{todoUrl}}"
+					],
+					"path": [
+						"list-todo"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "sort",
+							"value": "status"
+						}
+					]
+				},
+				"description": "pagiante required\n\nlimit, page in the query\n\nby default it will be limit = 5, page = 1\n\nsort can select 3 kind of sort\n\n1. created_at\n2. status\n3. title\n    \n\nOtherwise it will be created_at by default"
+			},
+			"response": [
+				{
+					"name": "200 ok",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/todo_v1/list-todo?page=1&limit=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"todo_v1",
+								"list-todo"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 11 Nov 2023 07:10:49 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "439"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"_id\": \"654f272d3eb1f846970239c0\",\n        \"title\": \"test1\",\n        \"description\": \"test1\",\n        \"created_at\": \"2023-11-11T14:03:09.662+07:00\",\n        \"updated_at\": \"2023-11-11T14:03:24.844+07:00\",\n        \"image\": \"data:image/png;base64,\",\n        \"status\": \"IN_PROGRESS\"\n    },\n    {\n        \"_id\": \"654f27363eb1f846970239c1\",\n        \"title\": \"test2\",\n        \"description\": \"test2\",\n        \"created_at\": \"2023-11-11T14:03:18.671+07:00\",\n        \"updated_at\": \"2023-11-11T14:03:18.671+07:00\",\n        \"image\": \"data:image/png;base64,\",\n        \"status\": \"IN_PROGRESS\"\n    }\n]"
+				}
+			]
+		},
+		{
+			"name": "search-todo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{todoUrl}}/search-todo?search=Description",
+					"host": [
+						"{{todoUrl}}"
+					],
+					"path": [
+						"search-todo"
+					],
+					"query": [
+						{
+							"key": "search",
+							"value": "Description"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "200 ok",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/todo_v1/search-todo?search=Description",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"todo_v1",
+								"search-todo"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "Description"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 11 Nov 2023 08:02:29 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "727"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"_id\": \"654f2e233868640076541806\",\n        \"title\": \"Migrate Title1\",\n        \"description\": \"Migrate Description1\",\n        \"created_at\": \"2023-11-11T14:32:51.222+07:00\",\n        \"updated_at\": \"2023-11-11T14:32:51.222+07:00\",\n        \"image\": \"data:image/png;base64,\",\n        \"status\": \"IN_PROGRESS\"\n    },\n    {\n        \"_id\": \"654f2e233868640076541807\",\n        \"title\": \"Migrate Title2\",\n        \"description\": \"Migrate Description2\",\n        \"created_at\": \"2023-11-11T14:32:51.222+07:00\",\n        \"updated_at\": \"2023-11-11T14:32:51.222+07:00\",\n        \"image\": \"data:image/png;base64,\",\n        \"status\": \"IN_PROGRESS\"\n    },\n    {\n        \"_id\": \"654f2e233868640076541808\",\n        \"title\": \"Migrate Title3\",\n        \"description\": \"Migrate Description3\",\n        \"created_at\": \"2023-11-11T14:32:51.222+07:00\",\n        \"updated_at\": \"2023-11-11T14:32:51.222+07:00\",\n        \"image\": \"data:image/png;base64,\",\n        \"status\": \"COMPLETE\"\n    }\n]"
+				}
+			]
+		},
+		{
+			"name": "delete todo",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{todoUrl}}/todo/654f2a7b7a21397ed9095ad0",
+					"host": [
+						"{{todoUrl}}"
+					],
+					"path": [
+						"todo",
+						"654f2a7b7a21397ed9095ad0"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "200 ok",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/todo_v1/todo/654f2a7b7a21397ed9095ad0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"todo_v1",
+								"todo",
+								"654f2a7b7a21397ed9095ad0"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 11 Nov 2023 07:17:34 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "39"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"count\": 1,\n    \"msg\": \"Delete todo success\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Insert Todo",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "description",
+							"value": "test5",
+							"type": "text"
+						},
+						{
+							"key": "title",
+							"value": "test5",
+							"type": "text"
+						},
+						{
+							"key": "image",
+							"type": "file",
+							"src": []
+						},
+						{
+							"key": "status",
+							"value": "IN_PROGRESS",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{todoUrl}}/todo",
+					"host": [
+						"{{todoUrl}}"
+					],
+					"path": [
+						"todo"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "201 ok",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "description",
+									"value": "test5",
+									"type": "text"
+								},
+								{
+									"key": "title",
+									"value": "test5",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "status",
+									"value": "IN_PROGRESS",
+									"type": "text"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/todo_v1/todo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"todo_v1",
+								"todo"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 11 Nov 2023 07:11:11 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "218"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"_id\": \"654f290f9afc06e900c715b0\",\n    \"title\": \"test5\",\n    \"description\": \"test5\",\n    \"created_at\": \"2023-11-11T14:11:11.455+07:00\",\n    \"updated_at\": \"2023-11-11T14:11:11.455+07:00\",\n    \"image\": \"data:image/png;base64,\",\n    \"status\": \"IN_PROGRESS\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Update todo",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "_id",
+							"value": "654f290f9afc06e900c715b0",
+							"type": "text"
+						},
+						{
+							"key": "title",
+							"value": "test5",
+							"type": "text"
+						},
+						{
+							"key": "description",
+							"value": "test5",
+							"type": "text"
+						},
+						{
+							"key": "status",
+							"value": "IN_PROGRESS",
+							"type": "text"
+						},
+						{
+							"key": "image",
+							"value": "image: data:image/png;base64,",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{todoUrl}}/todo",
+					"host": [
+						"{{todoUrl}}"
+					],
+					"path": [
+						"todo"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "200 ok",
+					"originalRequest": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "_id",
+									"value": "654f290f9afc06e900c715b0",
+									"type": "text"
+								},
+								{
+									"key": "title",
+									"value": "test5",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "test5",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "IN_PROGRESS",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"value": "image: data:image/png;base64,",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/todo_v1/todo",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"todo_v1",
+								"todo"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 11 Nov 2023 07:15:10 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "218"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"_id\": \"654f290f9afc06e900c715b0\",\n    \"title\": \"test5\",\n    \"description\": \"test5\",\n    \"created_at\": \"2023-11-11T14:11:11.455+07:00\",\n    \"updated_at\": \"2023-11-11T14:15:10.064+07:00\",\n    \"image\": \"data:image/png;base64,\",\n    \"status\": \"IN_PROGRESS\"\n}"
+				}
+			]
+		}
+	]
+}
