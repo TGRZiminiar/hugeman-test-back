@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/TGRZiminiar/hugeman-test-back/config"
 	"github.com/gin-contrib/cors"
@@ -33,35 +34,19 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 		db:  db,
 		cfg: cfg,
 	}
-	// r := gin.Default()
-	// r.GET("/ping", func(c *gin.Context) {
-	// 	c.JSON(http.StatusOK, gin.H{
-	// 		"message": "pong",
-	// 	})
-	// })
-	// r.Run()
 
 	// Cors
-	// s.app.Use(cors.New(cors.Config{
-	// 	AllowOrigins:  []string{"*"},
-	// 	AllowMethods:  []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
-	// 	AllowHeaders:  []string{"Origin"},
-	// 	ExposeHeaders: []string{"Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With"},
-	// 	// AllowCredentials: true,
-	// 	AllowOriginFunc: func(origin string) bool {
-	// 		return origin == "http://localhost:3000"
-	// 	},
-	// 	MaxAge: 12 * time.Hour,
-	// }))
-	s.app.Use(cors.Default())
-
-	// Body Limit 10 mb
-	// s.app.Use(limits.RequestSizeLimiter(500))
+	s.app.Use(cors.New(cors.Config{
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
+		AllowCredentials: false,
+		MaxAge:           12 * time.Hour,
+		AllowAllOrigins:  true,
+	}))
 
 	switch s.cfg.App.Name {
 	case "todo":
 		s.todoService()
-
 	}
 
 	s.httpListening()

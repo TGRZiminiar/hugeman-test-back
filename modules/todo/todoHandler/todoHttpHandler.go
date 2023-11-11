@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/TGRZiminiar/hugeman-test-back/config"
@@ -18,11 +19,12 @@ import (
 
 type (
 	TodoHttpHandlerService interface {
-		CreateItem(c *gin.Context)
+		CreateTodo(c *gin.Context)
 		FindOneTodo(c *gin.Context)
 		FindManyTodo(c *gin.Context)
 		DeleteOneTodo(c *gin.Context)
 		UpdateOneTodo(c *gin.Context)
+		SearchTodo(c *gin.Context)
 	}
 
 	todoHttpHandler struct {
@@ -38,7 +40,7 @@ func NewTodoHttpHandler(cfg *config.Config, todoUsecase todousecase.TodoUseCaseS
 	}
 }
 
-func (h *todoHttpHandler) CreateItem(c *gin.Context) {
+func (h *todoHttpHandler) CreateTodo(c *gin.Context) {
 
 	ctx := context.Background()
 
@@ -86,14 +88,14 @@ func (h *todoHttpHandler) CreateItem(c *gin.Context) {
 func (h *todoHttpHandler) FindOneTodo(c *gin.Context) {
 	ctx := context.Background()
 
-	itemId := c.Param("todoId")
+	todoId := c.Param("todoId")
 
-	if itemId == "" {
-		response.ErrResponse(c, http.StatusBadRequest, "itemId is required")
+	if todoId == "" {
+		response.ErrResponse(c, http.StatusBadRequest, "todoId is required")
 		return
 	}
 
-	res, err := h.todoUsecase.FindOneTodo(ctx, itemId)
+	res, err := h.todoUsecase.FindOneTodo(ctx, todoId)
 	if err != nil {
 		response.ErrResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -102,36 +104,59 @@ func (h *todoHttpHandler) FindOneTodo(c *gin.Context) {
 	response.SuccessResponse(c, http.StatusOK, res)
 
 }
-
 func (h *todoHttpHandler) FindManyTodo(c *gin.Context) {
 	ctx := context.Background()
+	var limit, page int
+	var sort string = "date"
 
-	result, err := h.todoUsecase.FindManyTodo(ctx)
+	limitQ, ok := c.GetQuery("limit")
+	if !ok {
+		limit = 5
+	} else {
+		limit, _ = strconv.Atoi(limitQ)
+	}
+	pageQ, ok := c.GetQuery("page")
+	if !ok {
+		page = 1
+	} else {
+		page, _ = strconv.Atoi(pageQ)
+	}
+	sortQ := c.Query("sort")
+	switch sortQ {
+	case "created_at", "status", "title":
+		sort = sortQ
+	default:
+		sort = "created_at"
+	}
+
+	result, err := h.todoUsecase.FindManyTodo(ctx, page, limit, sort)
 	if err != nil {
 		response.ErrResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	response.SuccessResponse(c, http.StatusOK, result)
-
 }
 
 func (h *todoHttpHandler) DeleteOneTodo(c *gin.Context) {
 	ctx := context.Background()
 
-	itemId := c.Param("todoId")
+	todoId := c.Param("todoId")
 
-	if itemId == "" {
-		response.ErrResponse(c, http.StatusBadRequest, "itemId is required")
+	if todoId == "" {
+		response.ErrResponse(c, http.StatusBadRequest, "todoId is required")
 		return
 	}
 
-	res, err := h.todoUsecase.DeleteOneTodo(ctx, itemId)
+	res, err := h.todoUsecase.DeleteOneTodo(ctx, todoId)
 	if err != nil {
 		response.ErrResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	response.SuccessResponse(c, http.StatusOK, res)
+	response.SuccessResponse(c, http.StatusOK, gin.H{
+		"msg":   "Delete todo success",
+		"count": res,
+	})
 
 }
 
@@ -181,5 +206,23 @@ func (h *todoHttpHandler) UpdateOneTodo(c *gin.Context) {
 		response.ErrResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	response.SuccessResponse(c, http.StatusCreated, todos)
+	response.SuccessResponse(c, http.StatusOK, todos)
+}
+
+func (h *todoHttpHandler) SearchTodo(c *gin.Context) {
+	ctx := context.Background()
+
+	search, ok := c.GetQuery("search")
+	if !ok {
+		response.ErrResponse(c, http.StatusBadRequest, "search query is required")
+		return
+	}
+
+	res, err := h.todoUsecase.SearchTodo(ctx, search)
+	if err != nil {
+		response.ErrResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	response.SuccessResponse(c, http.StatusOK, res)
+
 }

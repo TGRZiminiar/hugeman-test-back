@@ -16,8 +16,8 @@ func (m *TodoRepoMock) FindOneTodo(pctx context.Context, todoId string) (*todo.T
 	args := m.Called(pctx, todoId)
 	return args.Get(0).(*todo.Todo), args.Error(1)
 }
-func (m *TodoRepoMock) FindManyTodo(pctx context.Context) ([]*todo.Todo, error) {
-	args := m.Called(pctx)
+func (m *TodoRepoMock) FindManyTodo(pctx context.Context, page, limit int, sort string) ([]*todo.Todo, error) {
+	args := m.Called(pctx, page, limit, sort)
 	return args.Get(0).([]*todo.Todo), args.Error(1)
 }
 
@@ -34,4 +34,9 @@ func (m *TodoRepoMock) InsertOneTodo(pctx context.Context, req *todo.Todo) (prim
 func (m *TodoRepoMock) DeleteOneTodo(pctx context.Context, todoId string) (int64, error) {
 	args := m.Called(pctx, todoId)
 	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *TodoRepoMock) SearchTodo(pctx context.Context, text string) ([]*todo.Todo, error) {
+	args := m.Called(pctx, text)
+	return args.Get(0).([]*todo.Todo), args.Error(1)
 }

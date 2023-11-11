@@ -23,6 +23,15 @@ type (
 		expected *todo.TodoShowcase
 		todoReq  string
 	}
+	testFindManyObj struct {
+		ctx      context.Context
+		cfg      *config.Config
+		isErr    bool
+		page     int
+		limit    int
+		sort     string
+		expected []*todo.TodoShowcase
+	}
 	testInsert struct {
 		ctx      context.Context
 		cfg      *config.Config
@@ -134,6 +143,142 @@ func TestFindOne(t *testing.T) {
 		} else {
 			result.CreatedAt = time.Time{}
 			result.UpdatedAt = time.Time{}
+
+			assert.Equal(t, test.expected, result)
+		}
+	}
+}
+
+func TestFindMany(t *testing.T) {
+	repoMock := new(todorepository.TodoRepoMock)
+	usecase := todousecase.NewTodoUsecase(repoMock)
+
+	ctx := context.Background()
+	cfg := NewTestConfig()
+
+	resFindOneOK := primitive.NewObjectID()
+	// resFindOneFailed := primitive.NewObjectID()
+	loc, _ := time.LoadLocation("Asia/Bangkok")
+	testsFindMany := []testFindManyObj{
+		{
+			ctx:   ctx,
+			cfg:   cfg,
+			isErr: false,
+			page:  1,
+			limit: 2,
+			sort:  "created_at",
+			expected: []*todo.TodoShowcase{
+				{
+					Id:          resFindOneOK.Hex(),
+					Title:       "Test1",
+					Description: "Description1",
+					CreatedAt:   time.Time{}.In(loc),
+					UpdatedAt:   time.Time{}.In(loc),
+					Image:       "data:image/png;base64,image1",
+					Status:      "IN_PROGRESS",
+				},
+				{
+					Id:          resFindOneOK.Hex(),
+					Title:       "Test2",
+					Description: "Description2",
+					CreatedAt:   time.Time{}.In(loc),
+					UpdatedAt:   time.Time{}.In(loc),
+					Image:       "data:image/png;base64,image2",
+					Status:      "COMPLETE",
+				},
+			},
+		},
+		{
+			ctx:   ctx,
+			cfg:   cfg,
+			isErr: false,
+			page:  1,
+			limit: 2,
+			sort:  "status",
+			expected: []*todo.TodoShowcase{
+				{
+					Id:          resFindOneOK.Hex(),
+					Title:       "Test2",
+					Description: "Description2",
+					CreatedAt:   time.Time{}.In(loc),
+					UpdatedAt:   time.Time{}.In(loc),
+					Image:       "data:image/png;base64,image2",
+					Status:      "COMPLETE",
+				},
+				{
+					Id:          resFindOneOK.Hex(),
+					Title:       "Test1",
+					Description: "Description1",
+					CreatedAt:   time.Time{}.In(loc),
+					UpdatedAt:   time.Time{}.In(loc),
+					Image:       "data:image/png;base64,image1",
+					Status:      "IN_PROGRESS",
+				},
+			},
+		},
+		{
+			ctx:      ctx,
+			cfg:      cfg,
+			isErr:    true,
+			page:     0,
+			limit:    -1,
+			sort:     "created_at",
+			expected: []*todo.TodoShowcase{},
+		},
+	}
+
+	repoMock.On("FindManyTodo", ctx, 1, 2, "created_at").Return([]*todo.Todo{
+		{
+			Id:          resFindOneOK,
+			Title:       "Test1",
+			Description: "Description1",
+			CreatedAt:   time.Time{}.In(loc),
+			UpdatedAt:   time.Time{}.In(loc),
+			Image:       "image1",
+			Status:      "IN_PROGRESS",
+		},
+		{
+			Id:          resFindOneOK,
+			Title:       "Test2",
+			Description: "Description2",
+			CreatedAt:   time.Time{}.In(loc),
+			UpdatedAt:   time.Time{}.In(loc),
+			Image:       "image2",
+			Status:      "COMPLETE",
+		},
+	}, nil)
+	repoMock.On("FindManyTodo", ctx, 1, 2, "status").Return([]*todo.Todo{
+		{
+			Id:          resFindOneOK,
+			Title:       "Test2",
+			Description: "Description2",
+			CreatedAt:   time.Time{}.In(loc),
+			UpdatedAt:   time.Time{}.In(loc),
+			Image:       "image2",
+			Status:      "COMPLETE",
+		},
+		{
+			Id:          resFindOneOK,
+			Title:       "Test1",
+			Description: "Description1",
+			CreatedAt:   time.Time{}.In(loc),
+			UpdatedAt:   time.Time{}.In(loc),
+			Image:       "image1",
+			Status:      "IN_PROGRESS",
+		},
+	}, nil)
+
+	repoMock.On("FindManyTodo", ctx, 0, -1, "created_at").Return([]*todo.Todo{}, errors.New("error: todo list not found"))
+
+	fmt.Println("Find MANY Todo Test ->")
+	for i, test := range testsFindMany {
+		fmt.Printf("case -> %d\n", i+1)
+
+		result, err := usecase.FindManyTodo(test.ctx, test.page, test.limit, test.sort)
+
+		if test.isErr {
+			assert.NotEmpty(t, err)
+		} else {
 
 			assert.Equal(t, test.expected, result)
 		}

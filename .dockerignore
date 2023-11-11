@@ -1,0 +1,12 @@
+.git
+.gitignore
+
+LICENSE
+readme.md
+
+.air*
+
+*_test.go
+
+/build
+/testModules

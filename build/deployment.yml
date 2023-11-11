@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-deployment
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: todo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      volumes:
+      - name: app-env
+        configMap:
+          name: app-env
+      containers:
+        - name: auth
+          image: tgrziminiar/test-hugeman-go:v.0.1
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+          - name: app-env
+            mountPath: /etc/env
+          env:
+          - name: APP_STAGE
+            value: "production"
+          - name: APP_NAME
+            value: "todo"
+          - name: APP_URL
+            value: ":5000"
+          - name: APP_DB_URLNAME
+            value: "mongodb://mongo-service"

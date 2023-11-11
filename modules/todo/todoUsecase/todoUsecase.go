@@ -15,8 +15,9 @@ type (
 		InsertOneTodo(pctx context.Context, req *todo.CreateTodoReq) (*todo.TodoShowcase, error)
 		FindOneTodo(pctx context.Context, todoId string) (*todo.TodoShowcase, error)
 		DeleteOneTodo(pctx context.Context, todoId string) (int64, error)
-		FindManyTodo(pctx context.Context) ([]*todo.TodoShowcase, error)
+		FindManyTodo(pctx context.Context, page, limit int, sort string) ([]*todo.TodoShowcase, error)
 		UpdateOneTodo(pctx context.Context, req *todo.UpdateTodoReq) (*todo.TodoShowcase, error)
+		SearchTodo(pctx context.Context, text string) ([]*todo.TodoShowcase, error)
 	}
 
 	todoUsecase struct {
@@ -41,6 +42,7 @@ func (u *todoUsecase) InsertOneTodo(pctx context.Context, req *todo.CreateTodoRe
 
 	return u.FindOneTodo(pctx, todoId.Hex())
 }
+
 func (u *todoUsecase) UpdateOneTodo(pctx context.Context, req *todo.UpdateTodoReq) (*todo.TodoShowcase, error) {
 	err := u.todoRepository.UpdateOneTodo(pctx, &todo.TodoShowcase{
 		Id:          req.Id,
@@ -79,8 +81,9 @@ func (u *todoUsecase) FindOneTodo(pctx context.Context, todoId string) (*todo.To
 	}, nil
 }
 
-func (u *todoUsecase) FindManyTodo(pctx context.Context) ([]*todo.TodoShowcase, error) {
-	results, err := u.todoRepository.FindManyTodo(pctx)
+func (u *todoUsecase) FindManyTodo(pctx context.Context, page, limit int, sort string) ([]*todo.TodoShowcase, error) {
+
+	results, err := u.todoRepository.FindManyTodo(pctx, page, limit, sort)
 	if err != nil {
 		return make([]*todo.TodoShowcase, 0), err
 	}
@@ -109,12 +112,43 @@ func (u *todoUsecase) FindManyTodo(pctx context.Context) ([]*todo.TodoShowcase, 
 
 }
 
-// func (u *todoUsecase) UpdateOneTodo(pctx context.Context, req *todo.TodoShowcase)
-
 func (u *todoUsecase) DeleteOneTodo(pctx context.Context, todoId string) (int64, error) {
 	count, err := u.todoRepository.DeleteOneTodo(pctx, todoId)
 	if err != nil {
 		return -1, err
 	}
 	return count, nil
+}
+
+func (u *todoUsecase) SearchTodo(pctx context.Context, text string) ([]*todo.TodoShowcase, error) {
+
+	results, err := u.todoRepository.SearchTodo(pctx, text)
+	if err != nil {
+		return make([]*todo.TodoShowcase, 0), err
+	}
+	if err != nil {
+		return make([]*todo.TodoShowcase, 0), err
+	}
+
+	if len(results) == 0 {
+		return make([]*todo.TodoShowcase, 0), errors.New("error: no todo list found")
+	}
+
+	todos := make([]*todo.TodoShowcase, 0)
+
+	loc, _ := time.LoadLocation("Asia/Bangkok")
+
+	for _, v := range results {
+		todos = append(todos, &todo.TodoShowcase{
+			Id:          v.Id.Hex(),
+			Title:       v.Title,
+			Description: v.Description,
+			Image:       "data:image/png;base64," + v.Image,
+			Status:      v.Status,
+			CreatedAt:   v.CreatedAt.In(loc),
+			UpdatedAt:   v.UpdatedAt.In(loc),
+		})
+	}
+
+	return todos, nil
 }

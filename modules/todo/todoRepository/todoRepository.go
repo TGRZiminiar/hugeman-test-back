@@ -3,6 +3,7 @@ package todorepository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -19,8 +20,9 @@ type (
 		FindOneTodo(pctx context.Context, todoId string) (*todo.Todo, error)
 		InsertOneTodo(pctx context.Context, req *todo.Todo) (primitive.ObjectID, error)
 		DeleteOneTodo(pctx context.Context, todoId string) (int64, error)
-		FindManyTodo(pctx context.Context) ([]*todo.Todo, error)
+		FindManyTodo(pctx context.Context, page, limit int, sort string) ([]*todo.Todo, error)
 		UpdateOneTodo(pctx context.Context, req *todo.TodoShowcase) error
+		SearchTodo(pctx context.Context, text string) ([]*todo.Todo, error)
 	}
 
 	todorepository struct {
@@ -65,36 +67,47 @@ func (r *todorepository) FindOneTodo(pctx context.Context, todoId string) (*todo
 
 }
 
-func (r *todorepository) FindManyTodo(pctx context.Context) ([]*todo.Todo, error) {
+func (r *todorepository) FindManyTodo(pctx context.Context, page, limit int, sort string) ([]*todo.Todo, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 
 	db := r.todoDbConn(ctx)
 	col := db.Collection("todos")
+	offset := (page - 1) * limit
 
-	// Option
 	opts := make([]*options.FindOptions, 0)
-
-	opts = append(opts, options.Find().SetSort(bson.D{{"_id", 1}}))
-	// opts = append(opts, options.Find().SetLimit(int64(req.Limit)))
+	opts = append(opts, options.Find().
+		SetLimit(int64(limit)).
+		SetSkip(int64(offset)).
+		SetSort(bson.D{{sort, 1}}).
+		SetProjection(bson.M{
+			"_id":         1,
+			"title":       1,
+			"description": 1,
+			"created_at":  1,
+			"updated_at":  1,
+			"image":       1,
+			"status":      1,
+		}),
+	)
 
 	cursors, err := col.Find(ctx, bson.M{}, opts...)
 	if err != nil {
 		log.Printf("Error: FindManyToDo failed: %s", err.Error())
-		return nil, errors.New("error: todo list not found")
+		return []*todo.Todo{}, errors.New("error: todo list not found")
 	}
-
+	defer cursors.Close(ctx)
 	results := make([]*todo.Todo, 0)
 	for cursors.Next(ctx) {
 		result := new(todo.Todo)
+		result.Image = ""
 		if err := cursors.Decode(result); err != nil {
 			log.Printf("Error: FindManyToDo failed: %s", err.Error())
-			return nil, errors.New("error: todo list not found")
+			return []*todo.Todo{}, errors.New("error: todo list not found")
 		}
 
 		results = append(results, result)
 	}
-
 	return results, nil
 
 }
@@ -158,4 +171,56 @@ func (r *todorepository) DeleteOneTodo(pctx context.Context, todoId string) (int
 
 	log.Printf("Delete Result: %v", result)
 	return result.DeletedCount, nil
+
+}
+
+func (r *todorepository) SearchTodo(pctx context.Context, text string) ([]*todo.Todo, error) {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.todoDbConn(ctx)
+	col := db.Collection("todos")
+
+	opts := make([]*options.FindOptions, 0)
+
+	opts = append(opts, options.Find().
+		SetProjection(bson.M{
+			"_id":         1,
+			"title":       1,
+			"description": 1,
+			"created_at":  1,
+			"updated_at":  1,
+			"image":       1,
+			"status":      1,
+		}),
+	)
+
+	// i = case insensitive
+	filter := bson.M{
+		"$or": []bson.M{
+			{"title": bson.M{"$regex": text, "$options": "i"}},
+			{"description": bson.M{"$regex": text, "$options": "i"}},
+		},
+	}
+
+	fmt.Printf("Search : %s\n", text)
+
+	cursors, err := col.Find(ctx, filter, opts...)
+	if err != nil {
+		log.Printf("Error: Search Todo failed: %s", err.Error())
+		return []*todo.Todo{}, errors.New("error: todo list not found")
+	}
+	results := make([]*todo.Todo, 0)
+	for cursors.Next(ctx) {
+		result := new(todo.Todo)
+		result.Image = ""
+		if err := cursors.Decode(result); err != nil {
+			log.Printf("Error: Search Todo failed: %s", err.Error())
+			return []*todo.Todo{}, errors.New("error: todo list not found")
+		}
+
+		results = append(results, result)
+	}
+	return results, nil
+
 }

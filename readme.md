@@ -1,26 +1,45 @@
-## Start Server Need two step
-#### 1. Start Docker Environment
+
+## Sample Response ใน Postman ผมไม่ได้เอาข้อมูลรูปภาพ base64 เข้ามาด้วยนะครับพอไม่งั้นเดียวไฟล์ postman มันจะเยอะเกินไป
+## ถ้า Test โดยใช้ local ไม่ใช้ kube ใน postman ให้ Test ด้วย Port 5000
+## ถ้า Test โดยใช้ kube ให้ใช้ postman Port 80
+
+
+## Start Server Need In Local No Kube
+
+### 1. Start Docker Environment
 ```
 docker compose -f docker-compose.db.yml up -d
 ```
 
-#### 2. Select Environment File To Start Golang
+### 2. Select Environment File To Start Golang
 go run main.go ./env/dev/.env.dev
 
-### Command To Migrate
+#### Command To Migrate
+```
+go run ./pkg/database/script/migration.go ./env/dev/.env.dev
 ```
 
-go run ./pkg/database/script/migration.go ./env/dev/.env.todo
-
+#### Command To Build Dockerfile
+```
+docker build -f ./build/Dockerfile -t test-hugeman-go:latest .
+docker image tag test-hugeman-go:latest tgrziminiar/test-hugeman-go:v.0.1
 ```
 
+## Command To Handle Kubectl For Testing In Local Only
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
 
-- The TODO application can show the `LIST` of tasks with the following requirements
-    - Can sort the data by `Title` or `Date` or `Status` fields
-    - Can search the data by `Title` or `Description` fields
-- The TODO application can `UPDATE` a task with the following requirements
-    - Can update a task by `ID` field
-    - Can update `Title`, `Description`, `Date`, `Image`, and `Status` fields corresponding to the requirements from the `CREATE` feature
+kubectl create configmap app-env --from-file=./env/prod/.env
+
+kubectl apply -f ./build/mongo
+
+kubectl apply -f ./build/service.yml
+
+kubectl apply -f ./build/ingress.yml
+
+kubectl apply -f ./build/deployment.yml
+```
+
 
 # Api -> Get All Todo (Maybe Pagination) : No Params Required
 # Api -> Get Single Todo (For Update) : Need Todo Id Params
